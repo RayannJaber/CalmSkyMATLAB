@@ -22,7 +22,7 @@ function varargout = Testing(varargin)
 
 % Edit the above text to modify the response to help Testing
 
-% Last Modified by GUIDE v2.5 05-Nov-2018 15:33:55
+% Last Modified by GUIDE v2.5 07-Nov-2018 15:49:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,6 +61,10 @@ guidata(hObject, handles);
 % UIWAIT makes Testing wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+%%status = checkSDStatus(STUUUUUUUUF);
+
+hObject.SDStatus.String;
+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = Testing_OutputFcn(hObject, eventdata, handles) 
@@ -73,17 +77,24 @@ function varargout = Testing_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
+% --- Executes on button press in GetDataButton.
+function GetDataButton_Callback(hObject, eventdata, handles)
+% hObject    handle to GetDataButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
+
+
+% --- Executes on button press in ClearSDButton.
+function ClearSDButton_Callback(hObject, eventdata, handles)
+% hObject    handle to ClearSDButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
+
+%%function SDStatus = checkSDStatus(STUUUUUUUFFFFFFF)
+    % Gets Status of SD Card
+    %   Status 1 = No Data
+    %   Status 2 = Data is present on SD but already and up to date in matlab
+    %   Status 3 = Data is present on SD and not up to date in matlab
