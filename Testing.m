@@ -61,6 +61,12 @@ guidata(hObject, handles);
 % UIWAIT makes Testing wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+global time;
+global data;
+
+load('CalmSkyVars.mat','time','data');
+
+plotData(handles.DataDisplay);
 status = checkSDStatus(); % Returns SDStatus as a string
 
 set(handles.SDStatus,'String',status);
@@ -82,11 +88,26 @@ function GetDataButton_Callback(hObject, eventdata, handles)
 % hObject    handle to GetDataButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    data = [1 5 1];
-    time = [0.1 0.2 0.3];
-    plot(handles.DataDisplay,time,data);
-    
+    status = get(handles.SDStatus,'String');
+    if isequal(status,'Data is Out of Date')
+        global time
+        global data
+        
+        load('D:/CalmSkySDVars.mat','SDTime','SDData');
 
+        if SDTime(1) == time(end) + 1
+            time = [time SDTime];
+            data = [data SDData];
+        else 
+            warning('MISSING DATA');
+        end
+        
+        set(handles.SDStatus,'String',checkSDStatus());
+        plotData(handles.DataDisplay);
+        
+        save('CalmSkyVars.mat','time','data');
+    end
+    
 
 
 % --- Executes on button press in ClearSDButton.
@@ -94,22 +115,9 @@ function ClearSDButton_Callback(hObject, eventdata, handles)
 % hObject    handle to ClearSDButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-function SDStatus = checkSDStatus()
-    % Gets Status of SD Card
-    %   Status 1 = No Data
-    %   Status 2 = Data is present on SD but already and up to date in matlab
-    %   Status 3 = Data is present on SD and not up to date in matlab
-    if 0
-        SDStatus = 'No Data on Card';
-    elseif 0
-        SDStatus = 'Data is Out of Date';
-    elseif 0
-        SDStatus = 'Data is Up to Date, and Still on Card';
-    else
-        SDStatus = 'No SD Card Present';
-    end
+    delete 'D:/CalmSkySDVars.mat';
+    % pause(2);
+    set(handles.SDStatus,'String',checkSDStatus());
 
 
 % --------------------------------------------------------------------
@@ -143,3 +151,59 @@ function Details_Callback(hObject, eventdata, handles)
     set(handles.SeverityPanel,'Visible',false);
     set(handles.TimeSeriesPanel,'Visible',false);
     set(handles.InformationPanel,'Visible',true);
+    
+    
+    
+function SDStatus = checkSDStatus()
+% Gets Status of SD Card
+%   Status 1 = No Data
+%   Status 2 = Data is present on SD but already and up to date in matlab
+%   Status 3 = Data is present on SD and not up to date in matlab
+global time
+    if exist('D:/','dir')
+        if exist('D:/CalmSkySDVars.mat','file')
+            load('D:/CalmSkySDVars.mat','SDTime');
+            if length(SDTime) == length(time) || SDTime(end) == time(end)
+                SDStatus = 'Data is Up to Date, and Still on Card';
+            else
+                SDStatus = 'Data is Out of Date';
+            end
+        else
+            SDStatus = 'No Data on Card';
+        end
+    else
+        SDStatus = 'No SD Card Present';
+    end
+    
+function plotData(Axis)
+% Plots the data on the given axis
+global time
+global data
+
+initial = 1;
+threshold = 0.2;
+hold on;
+
+isCalm = true;
+if data(initial) < threshold
+    isCalm = false;
+end
+
+for i = 1:length(data)
+    
+    if data(i) < threshold && isCalm
+        plot(Axis,time(initial:i-1),data(initial:i-1),'g');
+        initial = i;
+        isCalm = false;
+    elseif data(i) > threshold && ~isCalm
+        plot(Axis,time(initial-1:i),data(initial-1:i),'r');
+        initial = i;
+        isCalm = true;
+    elseif i == length(data)
+        if isCalm
+            plot(Axis,time(initial:i),data(initial:i),'g');
+        else
+            plot(Axis,time(initial:i),data(initial:i),'r');
+        end
+    end
+end
